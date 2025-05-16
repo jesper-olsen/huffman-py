@@ -13,7 +13,7 @@ References
 ----------
 [1] "A Method for the Construction of Minimum-Redundancy Codes", David A. Huffman, Proceedings of the I.R.E., 1952, September
 
-[2]  https://videolectures.net/videos/mackay_course_04
+[2] [Video 4 from David MacKay's Information Theory course](https://videolectures.net/videos/mackay_course_04)
 
 [3] Chapter 5, [Information Theory, Inference, and Learning Algorithms, David J.C. MacKay](https://www.inference.org.uk/mackay/Book.html)
 
