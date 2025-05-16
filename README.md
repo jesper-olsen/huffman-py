@@ -3,7 +3,7 @@ Huffman-py
 
 Implementation of the Huffman algorithm: optimal prefix codes for lossless symbol compression.
 
-The implemntation supports:
+The implementation supports:
 * Calculate the Huffman tree for a given symbol distribution
 * Encoding/decoding of symbol streams 
 * Generate symbol codes
