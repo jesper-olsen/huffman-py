@@ -250,15 +250,14 @@ if __name__ == "__main__":
             text = input()
             freq = Counter(text)
             root = HuffmanNode.from_freq(freq)
-            root.display_codes()
             encoded = root.encode(text)
             decoded = root.decode(encoded)
 
-            print("Original:", text)
             print("Encoded:", encoded)
             print("Decoded:", decoded)
             assert text == decoded
 
+            root.display_codes()
             codes = root.generate_codes()
             lav = sum(freq[c] * len(codes[c]) for c in freq)
             lav = lav/sum(freq.values())
