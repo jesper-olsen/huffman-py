@@ -115,12 +115,12 @@ class HuffmanNode:
             node.char = symbol  # Assign symbol at leaf
         return root
 
-    def display_codes(self):
+    def display_codes(self, freq):
         codes = self.generate_codes()
         print(f"Codebook ({len(codes)})")
-        print("Symbol   l code")
+        print("Symbol  cnt length  code")
         for c in sorted(codes):
-            print(f"{c} -> {len(codes[c]):5} {codes[c]}")
+            print(f"{c} ->   {freq[c]:4}  {len(codes[c]):5}  {codes[c]}")
 
     # def __str__(self):
     #     return f"Node({self.char!r}, freq={self.freq})"
@@ -187,7 +187,8 @@ def ex1(text):
 
 
 def ex2(text):
-    root = HuffmanNode.from_freq(FREQ_HUFFMAN_PAPER)
+    freq=FREQ_HUFFMAN_PAPER
+    root = HuffmanNode.from_freq(freq)
     encoded = root.encode(text)
     decoded = root.decode(encoded)
     print(f"Encoded: {encoded}")
@@ -195,10 +196,10 @@ def ex2(text):
     assert text == decoded
 
     codes = root.generate_codes()
-    lav = sum(FREQ_HUFFMAN_PAPER[c] * len(codes[c]) for c in FREQ_HUFFMAN_PAPER)
+    lav = sum(freq[c] * len(codes[c]) for c in freq)
     assert lav == 342
-    root.display_codes()
-    print("Average code length: ", lav / sum(FREQ_HUFFMAN_PAPER.values()))
+    root.display_codes(freq)
+    print("Average code length: ", lav / sum(freq.values()))
 
 
 def ex3():
@@ -215,7 +216,7 @@ def ex5():
     root = HuffmanNode.from_freq(freq)
     codes = root.generate_codes()
     lav = sum(freq[c] * len(codes[c]) for c in freq)
-    root.display_codes()
+    root.display_codes(freq)
     print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
     assert lav == 41462
 
@@ -230,7 +231,7 @@ def ex4():
     root = HuffmanNode.from_codebook(codes)
     lav = sum(freq[c] * len(codes[c]) for c in freq)
     assert lav == 197
-    root.display_codes()
+    root.display_codes(freq)
     print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
 
 
@@ -257,7 +258,7 @@ if __name__ == "__main__":
             print("Decoded:", decoded)
             assert text == decoded
 
-            root.display_codes()
+            root.display_codes(freq)
             codes = root.generate_codes()
             lav = sum(freq[c] * len(codes[c]) for c in freq)
             lav = lav/sum(freq.values())
