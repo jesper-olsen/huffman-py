@@ -34,35 +34,35 @@ Encoded: 00000101100101001111101111100010000111101011110111110111001001000110010
 Decoded: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 Codebook (28)
-Symbol   l code
-  ->     3 110
-, ->     7 0101111
-. ->     6 000000
-D ->     8 00000100
-E ->     9 010110110
-L ->     8 00000101
-U ->     8 01011010
-a ->     4 1000
-b ->     7 0101011
-c ->     5 10110
-d ->     5 11100
-e ->     4 1111
-f ->     7 0000011
-g ->     7 0101110
-h ->     9 010110111
-i ->     3 001
-l ->     4 0001
-m ->     5 10111
-n ->     4 0110
-o ->     4 1001
-p ->     5 00001
-q ->     6 010100
-r ->     4 0100
-s ->     5 11101
-t ->     4 1010
-u ->     4 0111
-v ->     7 0101010
-x ->     7 0101100
-
+Symbol  cnt length  code
+  ->     68      3  110
+, ->      4      7  0101111
+. ->      4      6  000000
+D ->      1      8  00000100
+E ->      1      9  010110110
+L ->      1      8  00000101
+U ->      1      8  01011010
+a ->     29      4  1000
+b ->      3      7  0101011
+c ->     16      5  10110
+d ->     18      5  11100
+e ->     37      4  1111
+f ->      3      7  0000011
+g ->      3      7  0101110
+h ->      1      9  010110111
+i ->     42      3  001
+l ->     21      4  0001
+m ->     17      5  10111
+n ->     24      4  0110
+o ->     29      4  1001
+p ->     11      5  00001
+q ->      5      6  010100
+r ->     22      4  0100
+s ->     18      5  11101
+t ->     32      4  1010
+u ->     28      4  0111
+v ->      3      7  0101010
+x ->      3      7  0101100
 Average code length: 4.150561797752809, Entropy: 4.116828558046704
+
 ```
