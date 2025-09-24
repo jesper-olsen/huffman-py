@@ -14,10 +14,10 @@ from collections import defaultdict, Counter
 def canonical_huffman_codes(symbols_with_lengths):
     """
     Generate canonical Huffman codes from symbol-length pairs.
-    
+
     Args:
         symbols_with_lengths: List of (symbol, code_length) tuples
-        
+
     Returns:
         dict: Mapping of symbols to their binary code strings
     """
@@ -82,7 +82,9 @@ class HuffmanNode:
         print(f"Codebook ({len(self.codebook)})")
         print("Symbol  cnt length  code")
         for c in sorted(self.codebook):
-            print(f"{c} ->   {freq[c]:4}  {len(self.codebook[c]):5}  {self.codebook[c]}")
+            print(
+                f"{c} ->   {freq[c]:4}  {len(self.codebook[c]):5}  {self.codebook[c]}"
+            )
 
     def __str__(self):
         if self.char is not None:
@@ -140,6 +142,13 @@ class HuffmanNode:
         if not all(bit in "01" for bit in encoded):
             raise ValueError("Encoded string contains non-binary characters")
 
+        # Handle the edge case of a single-node tree (only one symbol)
+        if self.left is None and self.right is None:
+            if self.char is not None:
+                return self.char * len(encoded)
+            else:  # Should be impossible if tree is built correctly
+                return ""
+
         result = []
         node = self
         for bit in encoded:
@@ -154,6 +163,21 @@ class HuffmanNode:
             raise ValueError("Incomplete encoded string - ended mid-traversal")
 
         return "".join(result)
+
+    def total_weighted_code_length(self, freq_dict: dict) -> int:
+        """Calculates the sum of (frequency * code_length) for all symbols."""
+        if self.codebook is None:
+            self.generate_codes()
+
+        return sum(freq_dict[c] * len(self.codebook[c]) for c in freq_dict)
+
+    def average_code_length(self, freq_dict: dict) -> float:
+        """Calculates the average code length for a given frequency distribution."""
+        total_freq = sum(freq_dict.values())
+        if total_freq == 0:
+            return 0.0
+
+        return self.total_weighted_code_length(freq_dict) / total_freq
 
 
 def entropy(freq):
@@ -201,19 +225,17 @@ def ex2(text):
     assert text == decoded
 
     lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
-    assert lav == 342
     root.display_codes(freq)
-    print("Average code length: ", lav / sum(freq.values()))
+    lav = root.average_code_length(freq)
+    print("Average code length: {lav}")
+    assert root.total_weighted_code_length(freq) == 342
 
 
 def ex3():
     FREQ_MAC_KAY5_5 = {"a": 25, "b": 25, "c": 20, "d": 15, "e": 15}
     freq = FREQ_MAC_KAY5_5
     root = HuffmanNode.from_freq(freq)
-    lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
-    # root.display_codes()
-    # print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
-    assert lav == 230
+    assert root.total_weighted_code_length(freq) == 230
 
 
 def ex5():
@@ -248,10 +270,11 @@ def ex5():
     }
     freq = FREQ_MAC_KAY5_6
     root = HuffmanNode.from_freq(freq)
-    lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
     root.display_codes(freq)
-    print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
-    assert lav == 41462
+    print(
+        f"Average code length: {root.average_code_length(freq)} entropy: {entropy(freq)}"
+    )
+    assert root.total_weighted_code_length(freq) == 41462
 
 
 def ex4():
@@ -260,13 +283,14 @@ def ex4():
     FREQ_MAC_KAY5_7 = {"a": 1, "b": 24, "c": 5, "d": 20, "e": 47, "f": 1, "g": 2}
     freq = FREQ_MAC_KAY5_7
     root = HuffmanNode.from_freq(freq)
-    symbols_with_lengths = [(c, len(v)) for c,v in root.codebook.items()]
+    symbols_with_lengths = [(c, len(v)) for c, v in root.codebook.items()]
     codes = canonical_huffman_codes(symbols_with_lengths)
     root = HuffmanNode.from_codebook(codes)
-    lav = sum(freq[c] * len(codes[c]) for c in freq)
-    assert lav == 197
     root.display_codes(freq)
-    print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
+    print(
+        f"Average code length: {root.average_code_length(freq)} entropy: {entropy(freq)}"
+    )
+    assert root.total_weighted_code_length(freq) == 197
 
 
 if __name__ == "__main__":
@@ -283,16 +307,17 @@ if __name__ == "__main__":
         while True:
             print("\nInput a text to be Huffman encoded:")
             text = input()
+            if text == "":
+                break
             freq = Counter(text)
             root = HuffmanNode.from_freq(freq)
             encoded = root.encode(text)
-            decoded = root.decode(encoded)
-
             print("Encoded:", encoded)
+            decoded = root.decode(encoded)
             print("Decoded:", decoded)
             assert text == decoded
 
             root.display_codes(freq)
-            lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
-            lav = lav / sum(freq.values())
-            print(f"Average code length: {lav}, Entropy:", entropy(freq))
+            print(
+                f"Average code length: {root.average_code_length(freq)}, Entropy: {entropy(freq)}"
+            )
