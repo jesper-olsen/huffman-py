@@ -10,54 +10,6 @@ import heapq
 import math
 from collections import defaultdict, Counter
 
-FREQ_MAC_KAY5_5 = {"a": 25, "b": 25, "c": 20, "d": 15, "e": 15}
-FREQ_MAC_KAY5_7 = {"a": 1, "b": 24, "c": 5, "d": 20, "e": 47, "f": 1, "g": 2}
-FREQ_MAC_KAY5_6 = {
-    "a": 575,
-    "b": 128,
-    "c": 263,
-    "d": 285,
-    "e": 913,
-    "f": 173,
-    "g": 133,
-    "h": 313,
-    "i": 599,
-    "j": 6,
-    "k": 84,
-    "l": 335,
-    "m": 235,
-    "n": 596,
-    "o": 689,
-    "p": 192,
-    "q": 8,
-    "r": 508,
-    "s": 567,
-    "t": 706,
-    "u": 334,
-    "v": 69,
-    "w": 119,
-    "x": 73,
-    "y": 164,
-    "z": 7,
-    "–": 1928,
-}
-
-FREQ_HUFFMAN_PAPER = {
-    "a": 20,
-    "b": 18,
-    "c": 10,
-    "d": 10,
-    "e": 10,
-    "f": 6,
-    "g": 6,
-    "h": 4,
-    "i": 4,
-    "j": 4,
-    "k": 4,
-    "l": 3,
-    "m": 1,
-}
-
 
 def canonical_huffman_codes(symbols_with_lengths):
     """Codes from symbol-length pairs. The pairs must be from the canonical tree constructed by HuffmanNode"""
@@ -122,11 +74,26 @@ class HuffmanNode:
         for c in sorted(codes):
             print(f"{c} ->   {freq[c]:4}  {len(codes[c]):5}  {codes[c]}")
 
-    # def __str__(self):
-    #     return f"Node({self.char!r}, freq={self.freq})"
+    def __str__(self):
+        if self.char is not None:
+            return f"Leaf({self.char!r}, freq={self.freq})"
+        return f"Internal(freq={self.freq})"
 
-    # def __repr__(self):
-    #     return f"HuffmanTree(char={self.char!r}, freq={self.freq})"
+    def __repr__(self):
+        if self.char is not None:
+            return f"HuffmanNode(char={self.char!r}, freq={self.freq})"
+        return f"HuffmanNode(freq={self.freq}, left={bool(self.left)}, right={bool(self.right)})"
+
+    def pretty_print(self, indent=0):
+        prefix = "  " * indent
+        if self.char is not None:
+            print(f"{prefix}Leaf('{self.char}', freq={self.freq})")
+        else:
+            print(f"{prefix}Node(freq={self.freq})")
+            if self.left:
+                self.left.pretty_print(indent + 1)
+            if self.right:
+                self.right.pretty_print(indent + 1)
 
     # node comparison - needed for heapq
     def __lt__(self, other):
@@ -164,13 +131,10 @@ class HuffmanNode:
 
 
 def entropy(freq):
-    e = 0.0
     N = sum(freq.values())
-    for k in freq:
-        if freq[k] > 0:
-            p = freq[k] / N
-            e -= p * math.log2(p)
-    return e
+    if N == 0:
+        return 0.0
+    return -sum((f / N) * math.log2(f / N) for f in freq.values() if f > 0)
 
 
 def ex1(text):
@@ -187,7 +151,22 @@ def ex1(text):
 
 
 def ex2(text):
-    freq=FREQ_HUFFMAN_PAPER
+    FREQ_HUFFMAN_PAPER = {
+        "a": 20,
+        "b": 18,
+        "c": 10,
+        "d": 10,
+        "e": 10,
+        "f": 6,
+        "g": 6,
+        "h": 4,
+        "i": 4,
+        "j": 4,
+        "k": 4,
+        "l": 3,
+        "m": 1,
+    }
+    freq = FREQ_HUFFMAN_PAPER
     root = HuffmanNode.from_freq(freq)
     encoded = root.encode(text)
     decoded = root.decode(encoded)
@@ -203,15 +182,46 @@ def ex2(text):
 
 
 def ex3():
+    FREQ_MAC_KAY5_5 = {"a": 25, "b": 25, "c": 20, "d": 15, "e": 15}
     freq = FREQ_MAC_KAY5_5
     root = HuffmanNode.from_freq(freq)
     codes = root.generate_codes()
     lav = sum(freq[c] * len(codes[c]) for c in freq)
-    #root.display_codes()
-    #print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
+    # root.display_codes()
+    # print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
     assert lav == 230
 
+
 def ex5():
+    FREQ_MAC_KAY5_6 = {
+        "a": 575,
+        "b": 128,
+        "c": 263,
+        "d": 285,
+        "e": 913,
+        "f": 173,
+        "g": 133,
+        "h": 313,
+        "i": 599,
+        "j": 6,
+        "k": 84,
+        "l": 335,
+        "m": 235,
+        "n": 596,
+        "o": 689,
+        "p": 192,
+        "q": 8,
+        "r": 508,
+        "s": 567,
+        "t": 706,
+        "u": 334,
+        "v": 69,
+        "w": 119,
+        "x": 73,
+        "y": 164,
+        "z": 7,
+        "–": 1928,
+    }
     freq = FREQ_MAC_KAY5_6
     root = HuffmanNode.from_freq(freq)
     codes = root.generate_codes()
@@ -220,9 +230,11 @@ def ex5():
     print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
     assert lav == 41462
 
+
 def ex4():
     # Create Huffman codes, transmit only symbols and code lengths to receiveer
     # which decodes them
+    FREQ_MAC_KAY5_7 = {"a": 1, "b": 24, "c": 5, "d": 20, "e": 47, "f": 1, "g": 2}
     freq = FREQ_MAC_KAY5_7
     root = HuffmanNode.from_freq(freq)
     codes = root.generate_codes()
@@ -261,5 +273,5 @@ if __name__ == "__main__":
             root.display_codes(freq)
             codes = root.generate_codes()
             lav = sum(freq[c] * len(codes[c]) for c in freq)
-            lav = lav/sum(freq.values())
+            lav = lav / sum(freq.values())
             print(f"Average code length: {lav}, Entropy:", entropy(freq))
