@@ -41,6 +41,7 @@ class HuffmanNode:
         self.char = char
         self.left = None
         self.right = None
+        self.codebook = None
 
     @classmethod
     def from_freq(cls, freq_dict):
@@ -55,6 +56,7 @@ class HuffmanNode:
             merged.left = n1
             merged.right = n2
             heapq.heappush(heap, merged)
+        heap[0].generate_codes()
         return heap[0]
 
     @classmethod
@@ -73,14 +75,14 @@ class HuffmanNode:
                         node.right = cls(None, 0)
                     node = node.right
             node.char = symbol  # Assign symbol at leaf
+        root.codebook = codebook
         return root
 
     def display_codes(self, freq):
-        codes = self.generate_codes()
-        print(f"Codebook ({len(codes)})")
+        print(f"Codebook ({len(self.codebook)})")
         print("Symbol  cnt length  code")
-        for c in sorted(codes):
-            print(f"{c} ->   {freq[c]:4}  {len(codes[c]):5}  {codes[c]}")
+        for c in sorted(self.codebook):
+            print(f"{c} ->   {freq[c]:4}  {len(self.codebook[c]):5}  {self.codebook[c]}")
 
     def __str__(self):
         if self.char is not None:
@@ -107,24 +109,31 @@ class HuffmanNode:
     def __lt__(self, other):
         return self.freq < other.freq
 
-    def generate_codes(self, prefix="", codebook=None):
-        if codebook is None:
-            codebook = {}
+    def generate_codes(self):
+        if self.codebook is not None:
+            return self.codebook
+
+        self.codebook = {}
+        if self.char is not None:
+            # Edge case: tree with single node
+            self.codebook[self.char] = "0"
+        else:
+            self._build_codes("", self.codebook)
+
+    def _build_codes(self, prefix, codebook):
         if self.char is not None:
             codebook[self.char] = prefix
         else:
-            self.left.generate_codes(prefix + "0", codebook)
-            self.right.generate_codes(prefix + "1", codebook)
-        return codebook
+            if self.left:
+                self.left._build_codes(prefix + "0", codebook)
+            if self.right:
+                self.right._build_codes(prefix + "1", codebook)
 
     def encode(self, text):
-        codes = self.generate_codes()
-
-        missing_chars = set(text) - set(codes.keys())
+        missing_chars = set(text) - set(self.codebook.keys())
         if missing_chars:
             raise ValueError(f"Characters not in tree: {missing_chars}")
-
-        encoded = "".join(codes[c] for c in text)
+        encoded = "".join(self.codebook[c] for c in text)
         return encoded
 
     def decode(self, encoded):
@@ -191,8 +200,7 @@ def ex2(text):
     print("Decoded:", decoded)
     assert text == decoded
 
-    codes = root.generate_codes()
-    lav = sum(freq[c] * len(codes[c]) for c in freq)
+    lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
     assert lav == 342
     root.display_codes(freq)
     print("Average code length: ", lav / sum(freq.values()))
@@ -202,8 +210,7 @@ def ex3():
     FREQ_MAC_KAY5_5 = {"a": 25, "b": 25, "c": 20, "d": 15, "e": 15}
     freq = FREQ_MAC_KAY5_5
     root = HuffmanNode.from_freq(freq)
-    codes = root.generate_codes()
-    lav = sum(freq[c] * len(codes[c]) for c in freq)
+    lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
     # root.display_codes()
     # print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
     assert lav == 230
@@ -241,8 +248,7 @@ def ex5():
     }
     freq = FREQ_MAC_KAY5_6
     root = HuffmanNode.from_freq(freq)
-    codes = root.generate_codes()
-    lav = sum(freq[c] * len(codes[c]) for c in freq)
+    lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
     root.display_codes(freq)
     print(f"Average code length: {lav/sum(freq.values())} entropy: {entropy(freq)}")
     assert lav == 41462
@@ -254,8 +260,7 @@ def ex4():
     FREQ_MAC_KAY5_7 = {"a": 1, "b": 24, "c": 5, "d": 20, "e": 47, "f": 1, "g": 2}
     freq = FREQ_MAC_KAY5_7
     root = HuffmanNode.from_freq(freq)
-    codes = root.generate_codes()
-    symbols_with_lengths = [(c, len(codes[c])) for c in codes]
+    symbols_with_lengths = [(c, len(v)) for c,v in root.codebook.items()]
     codes = canonical_huffman_codes(symbols_with_lengths)
     root = HuffmanNode.from_codebook(codes)
     lav = sum(freq[c] * len(codes[c]) for c in freq)
@@ -288,7 +293,6 @@ if __name__ == "__main__":
             assert text == decoded
 
             root.display_codes(freq)
-            codes = root.generate_codes()
-            lav = sum(freq[c] * len(codes[c]) for c in freq)
+            lav = sum(freq[c] * len(root.codebook[c]) for c in freq)
             lav = lav / sum(freq.values())
             print(f"Average code length: {lav}, Entropy:", entropy(freq))
