@@ -1,4 +1,4 @@
-# Hoffman encoding/decoding of symbols.
+# Huffman encoding/decoding of symbols.
 #
 # References:
 #
@@ -12,7 +12,15 @@ from collections import defaultdict, Counter
 
 
 def canonical_huffman_codes(symbols_with_lengths):
-    """Codes from symbol-length pairs. The pairs must be from the canonical tree constructed by HuffmanNode"""
+    """
+    Generate canonical Huffman codes from symbol-length pairs.
+    
+    Args:
+        symbols_with_lengths: List of (symbol, code_length) tuples
+        
+    Returns:
+        dict: Mapping of symbols to their binary code strings
+    """
 
     # Sort by (length, symbol) as per canonical Huffman rules
     sorted_symbols = sorted(symbols_with_lengths, key=lambda x: (x[1], x[0]))
@@ -28,7 +36,7 @@ def canonical_huffman_codes(symbols_with_lengths):
 
 
 class HuffmanNode:
-    def __init__(self, char: chr, freq: int):
+    def __init__(self, char, freq: int):
         self.freq = freq
         self.char = char
         self.left = None
@@ -111,6 +119,11 @@ class HuffmanNode:
 
     def encode(self, text):
         codes = self.generate_codes()
+
+        missing_chars = set(text) - set(codes.keys())
+        if missing_chars:
+            raise ValueError(f"Characters not in tree: {missing_chars}")
+
         encoded = "".join(codes[c] for c in text)
         return encoded
 
@@ -127,6 +140,10 @@ class HuffmanNode:
             if node.char is not None:
                 result.append(node.char)
                 node = self
+
+        if node != self:
+            raise ValueError("Incomplete encoded string - ended mid-traversal")
+
         return "".join(result)
 
 
